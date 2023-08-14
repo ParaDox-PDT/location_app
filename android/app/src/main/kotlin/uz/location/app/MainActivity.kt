@@ -1,4 +1,4 @@
-package com.example.flutter_defualt_project
+package uz.location.app
 
 import io.flutter.embedding.android.FlutterActivity
 
