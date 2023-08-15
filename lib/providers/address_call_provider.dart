@@ -3,6 +3,7 @@ import 'package:flutter_defualt_project/data/network/api_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../data/models/universal_data.dart';
+import '../utils/constants.dart';
 
 class AddressCallProvider with ChangeNotifier{
   AddressCallProvider({required this.apiService});
@@ -11,7 +12,9 @@ class AddressCallProvider with ChangeNotifier{
 
   String scrolledAddressText = '';
   String kind = "house";
+  int kindIndex = 0;
   String lang = "uz_UZ";
+  MapType mapType=mapTypes.first;
 
   getAddressByLatLong({required LatLng latLng}) async {
     UniversalData universalData = await apiService.getAddress(

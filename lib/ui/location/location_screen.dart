@@ -37,6 +37,9 @@ class _LocationScreenState extends State<LocationScreen> {
                     .read<LocationProvider>()
                     .updateLatLong(LatLng(userAddress.lat, userAddress.long));
               },
+              onLongPress: (){
+                context.read<UserLocationsProvider>().deleteUserAddress(userAddress.id ?? 1);
+              },
               title: Text(userAddress.address),
               subtitle:
                   Text("Lat: ${userAddress.lat} and Longt:${userAddress.long}"),

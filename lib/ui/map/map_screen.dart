@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_defualt_project/ui/map/widgets/address_kind_selector.dart';
 import 'package:flutter_defualt_project/ui/map/widgets/address_lang_selector.dart';
 import 'package:flutter_defualt_project/ui/map/widgets/save_button.dart';
+import 'package:flutter_defualt_project/ui/map/widgets/typeOfMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -53,60 +54,63 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            GoogleMap(
-              onLongPress: (latLng) {
-                addNewMarker(latLng);
-              },
-              markers: markers,
-              onCameraMove: (CameraPosition cameraPosition) {
-                currentCameraPosition = cameraPosition;
-              },
-              onCameraIdle: () {
-                debugPrint(
-                    "CURRENT CAMERA POSITION: ${currentCameraPosition.target.latitude}");
+      body: Stack(
+        children: [
+          GoogleMap(
 
-                context
-                    .read<AddressCallProvider>()
-                    .getAddressByLatLong(latLng: currentCameraPosition.target);
+            myLocationButtonEnabled: false,
+            onLongPress: (latLng) {
+              addNewMarker(latLng);
+            },
+            markers: markers,
+            onCameraMove: (CameraPosition cameraPosition) {
+              currentCameraPosition = cameraPosition;
+            },
+            onCameraIdle: () {
+              debugPrint(
+                  "CURRENT CAMERA POSITION: ${currentCameraPosition.target.latitude}");
 
-                setState(() {
-                  onCameraMoveStarted = false;
-                });
+              context
+                  .read<AddressCallProvider>()
+                  .getAddressByLatLong(latLng: currentCameraPosition.target);
 
-                debugPrint("MOVE FINISHED");
-              },
-              liteModeEnabled: false,
-              myLocationEnabled: false,
-              padding: const EdgeInsets.all(16),
-              zoomGesturesEnabled: true,
-              zoomControlsEnabled: true,
-              mapType: MapType.terrain,
-              onCameraMoveStarted: () {
-                setState(() {
-                  onCameraMoveStarted = true;
-                });
-                debugPrint("MOVE STARTED");
-              },
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              initialCameraPosition: initialCameraPosition,
+              setState(() {
+                onCameraMoveStarted = false;
+              });
+
+              debugPrint("MOVE FINISHED");
+            },
+            liteModeEnabled: false,
+            myLocationEnabled: true,
+            padding: const EdgeInsets.all(16),
+            zoomGesturesEnabled: true,
+            zoomControlsEnabled: true,
+            mapType: context.watch<AddressCallProvider>().mapType,
+            onCameraMoveStarted: () {
+              setState(() {
+                onCameraMoveStarted = true;
+              });
+              debugPrint("MOVE STARTED");
+            },
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+            initialCameraPosition: initialCameraPosition,
+          ),
+          Align(
+            child: Icon(
+              Icons.location_pin,
+              color: Colors.red,
+              size: onCameraMoveStarted ? 50 : 32,
             ),
-            Align(
-              child: Icon(
-                Icons.location_pin,
-                color: Colors.red,
-                size: onCameraMoveStarted ? 50 : 32,
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 70),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 150),
+              child: Container(
+                color: Colors.black38,
                 child: Text(
                   context.watch<AddressCallProvider>().scrolledAddressText,
                   textAlign: TextAlign.center,
@@ -119,34 +123,42 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: AddressKindSelector(),
+          ),
+          const Positioned(
+            top: 20,
+            right: 0,
+            child: KindOfAddress(),
+          ),
+          const Positioned(
+            top: 60,
+            right: 0,
+            child: LanguageOfAddress(),
+          ),
+          const Positioned(
+            top: 100,
+            right: 0,
+            child: TypeOfMap(),
+          ),
+          Positioned(
+            bottom: 20,
+            right: MediaQuery.of(context).size.width/2-30,
+            child: Visibility(
+              visible: context.watch<AddressCallProvider>().canSaveAddress(),
+              child: SaveButton(onTap: () {
+                AddressCallProvider adp =
+                    Provider.of<AddressCallProvider>(context, listen: false);
+                context.read<UserLocationsProvider>().insertUserAddress(
+                      UserAddress(
+                        lat: currentCameraPosition.target.latitude,
+                        long: currentCameraPosition.target.longitude,
+                        address: adp.scrolledAddressText,
+                        created: DateTime.now().toString(),
+                      ),
+                    );
+              }),
             ),
-            const Align(
-              alignment: Alignment.centerRight,
-              child: AddressLangSelector(),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Visibility(
-                visible: context.watch<AddressCallProvider>().canSaveAddress(),
-                child: SaveButton(onTap: () {
-                  AddressCallProvider adp =
-                      Provider.of<AddressCallProvider>(context, listen: false);
-                  context.read<UserLocationsProvider>().insertUserAddress(
-                        UserAddress(
-                          lat: currentCameraPosition.target.latitude,
-                          long: currentCameraPosition.target.longitude,
-                          address: adp.scrolledAddressText,
-                          created: DateTime.now().toString(),
-                        ),
-                      );
-                }),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(

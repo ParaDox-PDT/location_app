@@ -33,6 +33,7 @@ class _TabBoxScreenState extends State<TabBoxScreen> {
         onTap: (index) {
           context.read<TabBoxProvider>().changeIndex(index);
         },
+        currentIndex: context.read<TabBoxProvider>().activeIndex,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
           BottomNavigationBarItem(
