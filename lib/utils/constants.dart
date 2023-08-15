@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const baseUrl = "https://geocode-maps.yandex.ru";
-const String apiKey = "78afe24c-066a-487f-bba4-af7a70bef19f";
+const String apiKey = "53e1e1d1-4374-4b7c-843c-83cd6678624e";
 
 class TimeOutConstants {
   static int connectTimeout = 30;

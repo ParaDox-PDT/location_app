@@ -27,16 +27,19 @@ class _MapScreenState extends State<MapScreen> {
   late CameraPosition currentCameraPosition;
   bool onCameraMoveStarted = false;
 
-  Set<Marker> markers = {};
+
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+  
+  _init()async{
+    
+  }
 
   @override
   void initState() {
     LocationProvider locationProvider =
         Provider.of<LocationProvider>(context, listen: false);
-    addNewMarker(locationProvider.latLong!);
 
     initialCameraPosition = CameraPosition(
       target: locationProvider.initialLatLong!,
@@ -57,12 +60,11 @@ class _MapScreenState extends State<MapScreen> {
       body: Stack(
         children: [
           GoogleMap(
-
             myLocationButtonEnabled: false,
             onLongPress: (latLng) {
-              addNewMarker(latLng);
+              context.read<LocationProvider>().addNewMarker(latLng);
             },
-            markers: markers,
+            markers: context.watch<LocationProvider>().markers,
             onCameraMove: (CameraPosition cameraPosition) {
               currentCameraPosition = cameraPosition;
             },
@@ -110,14 +112,15 @@ class _MapScreenState extends State<MapScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 150),
               child: Container(
-                color: Colors.black38,
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(16),color: Colors.black38,),
                 child: Text(
                   context.watch<AddressCallProvider>().scrolledAddressText,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: const TextStyle(
                     fontSize: 22,
-                    color: Colors.red,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -177,17 +180,5 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  addNewMarker(LatLng latLng) async {
-    // Uint8List uint8list = await getBytesFromAsset("assets/courier.png", 150);
-    markers.add(Marker(
-        markerId: MarkerId(
-          DateTime.now().toString(),
-        ),
-        position: latLng,
-        icon: BitmapDescriptor.defaultMarker,
-        //BitmapDescriptor.defaultMarker,
-        infoWindow: const InfoWindow(
-            title: "Samarqand", snippet: "Falonchi Ko'chasi 45-uy ")));
-    setState(() {});
-  }
+  
 }
