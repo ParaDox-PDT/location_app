@@ -2,7 +2,8 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../models/default_model.dart';
+
+import '../../models/user_address.dart';
 
 class LocalDatabase{
   static final LocalDatabase getInstance = LocalDatabase._init();
@@ -33,121 +34,54 @@ class LocalDatabase{
   Future _createDB(Database db, int version)async{
     const idType = "INTEGER PRIMARY KEY AUTOINCREMENT";
     const textType = "TEXT NOT NULL";
-    const intType = "INTEGER DEFAULT 0";
+    // const intType = "INTEGER DEFAULT 0";
+    const doubleType = "REAL DEFAULT 0.0";
 
 
     await db.execute('''
-    CREATE TABLE ${DefaultModelFields.defaultTable}(
-    ${DefaultModelFields.id} $idType,
-    ${DefaultModelFields.id} $intType,
-    ${DefaultModelFields.name} $textType,
-    )
+    CREATE TABLE ${UserAddressFields.userLocationTable}(
+    ${UserAddressFields.id} $idType,
+    ${UserAddressFields.lat} $doubleType,
+    ${UserAddressFields.long} $doubleType,
+    ${UserAddressFields.address} $textType,
+    ${UserAddressFields.created} $textType
+    );
     ''');
   }
 
-  static Future<DefaultModel> insertContact(
-      DefaultModel defaultModel) async {
+  static Future<UserAddress> insertUserAddress(UserAddress locationUserModel) async {
     final db = await getInstance.database;
     final int id = await db.insert(
-        DefaultModelFields.defaultTable, defaultModel.toJson());
-    return defaultModel.copyWith(id: id);
+        UserAddressFields.userLocationTable, locationUserModel.toJson());
+
+
+    return locationUserModel.copyWith(id: id);
   }
 
-  static Future<List<DefaultModel>> getAllContacts() async {
-    List<DefaultModel> allInfo = [];
+  static Future<List<UserAddress>> getAllUserAddresses() async {
+    List<UserAddress> allLocationUser = [];
     final db = await getInstance.database;
-    allInfo = (await db.query(DefaultModelFields.defaultTable))
-        .map((e) => DefaultModel.fromJson(e))
+    allLocationUser = (await db.query(UserAddressFields.userLocationTable))
+        .map((e) => UserAddress.fromJson(e))
         .toList();
 
-    return allInfo;
+    return allLocationUser;
   }
 
-  static Future<List<DefaultModel>> getContactsByAlphabet(
-      String order) async {
-    List<DefaultModel> allToDos = [];
-    final db = await getInstance.database;
-    allToDos = (await db.query(DefaultModelFields.defaultTable,
-        orderBy: "${DefaultModelFields.name} $order"))
-        .map((e) => DefaultModel.fromJson(e))
-        .toList();
-    return allToDos;
-  }
-
-  static updateContactName({required int id, required String name}) async {
-    final db = await getInstance.database;
-    db.update(
-      DefaultModelFields.defaultTable,
-      {DefaultModelFields.name: name},
-      where: "${DefaultModelFields.id} = ?",
-      whereArgs: [id],
-    );
-  }
-
-  static updateInfo({required DefaultModel defaultModel}) async {
-    final db = await getInstance.database;
-    db.update(
-      DefaultModelFields.defaultTable,
-      defaultModel.toJson(),
-      where: "${DefaultModelFields.id} = ?",
-      whereArgs: [defaultModel.id],
-    );
-  }
-
-  static deleteContact(int id) async {
+  static deleteUserAddress(int id) async {
     final db = await getInstance.database;
     db.delete(
-      DefaultModelFields.defaultTable,
-      where: "${DefaultModelFields.id} = ?",
+      UserAddressFields.userLocationTable,
+      where: "${UserAddressFields.id} = ?",
       whereArgs: [id],
     );
   }
 
-  static deleteAllInfo() async {
+  static deleteAllAddresses() async {
     final db = await getInstance.database;
     db.delete(
-      DefaultModelFields.defaultTable,
+      UserAddressFields.userLocationTable,
     );
   }
 
-  static Future<List<DefaultModel>> getInfoByLimit(int limit) async {
-    List<DefaultModel> allToDos = [];
-    final db = await getInstance.database;
-    allToDos = (await db.query(DefaultModelFields.defaultTable,
-        limit: limit, orderBy: "${DefaultModelFields.name} ASC"))
-        .map((e) => DefaultModel.fromJson(e))
-        .toList();
-
-    return allToDos;
-  }
-
-  static Future<DefaultModel?> getSingleContact(int id) async {
-    List<DefaultModel> allInfo = [];
-    final db = await getInstance.database;
-    allInfo = (await db.query(
-      DefaultModelFields.defaultTable,
-      where: "${DefaultModelFields.id} = ?",
-      whereArgs: [id],
-    ))
-        .map((e) => DefaultModel.fromJson(e))
-        .toList();
-
-    if (allInfo.isNotEmpty) {
-      return allInfo.first;
-    }
-    return allInfo.last;
-  }
-
-  static Future<List<DefaultModel>> getInfoByQuery(String query) async {
-    List<DefaultModel> allInfo = [];
-    final db = await getInstance.database;
-    allInfo = (await db.query(
-      DefaultModelFields.defaultTable,
-      where: "${DefaultModelFields.name} LIKE ?",
-      whereArgs: [query],
-    ))
-        .map((e) => DefaultModel.fromJson(e))
-        .toList();
-    return allInfo;
-  }
 }
